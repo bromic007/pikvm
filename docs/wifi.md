@@ -1,30 +1,22 @@
 # Setting up Wi-Fi
 
-The following describes how to setup a Wi-Fi connection on the default pikvm builds based on Arch Linux.
-The process might vary for other Linux distros. We recommend to do this while having a display and keyboard
-connected directly to the Raspberry Pi as you will loose network connectivity once you connect to a Wi-Fi.
+!!! tip
+    There is nothing more reliable than wired Ethernet, so it's better to use it. Wi-Fi with the steel case (on PiKVM V3 and V4) results in poor performance. But who are we to stop you... :)
+
+The following describes how to setup a Wi-Fi connection.
+We recommend to do this while having a display and keyboard
+or a serial console connected directly to the Raspberry Pi as you will loose network connectivity once you connect to a Wi-Fi.
 Alternatively you can connect to the PiKVM via SSH. The built-in Web Terminal (available through the browser) should also work.
 
-!!! warning
-    Please review [First Steps](first_steps.md) if you are setting up wifi for the zero2w. This guide also applies to Wi-Fi setup for v2+ devices if switching from Ethernet to Wi-Fi..
+!!! warning "Take a look at the easiest way"
+    This guide describes how to manually set up a Wi-Fi. An easier way is to use [On-boot config](on_boot_config.md).
+    It is also mandatory for Zero 2 W board.
 
-!!! warning
-    There is nothing more reliable than wired Ethernet, so it's better to use it. Wi-Fi with the steel case (on V3) results in poor performance. But who are we to stop you... :)
-
-!!! note "[ADVANCED USERS ONLY] Moving Wi-Fi settings for OS older than 2021.10.19"
-    Starting from 2021.10.19, the old way to configure Wi-Fi using `netctl` is deprecated.
-    Instead, it is proposed to use a more native path with `systemd-networkd`, which is already used to configure Ethernet.
-    Follow the guide and then delete the old netctl profile:
-
-    ```
-    # rw
-    # systemctl disable netctl-auto@wlan0.service
-    # rm /etc/netctl/wlan0-*
-    # ro
-    ```
+!!! note
+    Devices based on Raspberry Pi Zero 2 W does not support 5GHz Wi-Fi.
 
 
-## Step by step - Advances users ONLY section
+## Setting up Wi-Fi manually
 
 1. Make filesystem writable using `rw` command.
 
@@ -38,15 +30,16 @@ Alternatively you can connect to the PiKVM via SSH. The built-in Web Terminal (a
     DHCP=yes
     DNSSEC=no
 
-    # Use same IP by forcing to use MAC address for clientID
     [DHCP]
     ClientIdentifier=mac
+    RouteMetric=50
     ```
 
 3. Set network ESSID and password:
 
     ```
     # wpa_passphrase 'MyNetwork' 'P@assw0rd' > /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+    # chmod 640 /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
     ```
     
     !!! note "Using Wi-Fi with hidden ESSID"
@@ -55,13 +48,16 @@ Alternatively you can connect to the PiKVM via SSH. The built-in Web Terminal (a
     !!! note "Using 5GHz Wi-Fi in the USA"
         Add option `country=US` to `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`
 
+    !!! note "Block 2ghz or 5ghz"
+        Add option `bssid=xx:xx:xx:xx:xx:xx` to `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf` within the `network={` block
 
-4. Enable WPA-supplicant service:
+
+5. Enable WPA-supplicant service:
    ```
    systemctl enable wpa_supplicant@wlan0.service
    ```
 
-5. Make filesystem read-only again using `ro` command
+6. Make filesystem read-only again using `ro` command
 
 
 ## Useful console commands

@@ -1,25 +1,17 @@
 # H.264 / WebRTC
 
-!!! note
-    * Officially supported browsers: Chrome, Firefox and Safari.
-    * Only for V3+ and other devices based on CSI bridge
-
-This is a main video streaming mode available for all V3+ users and DIY devices with CSI bridge.
-With the efficient H.264 encoding, a significant reduction in traffic is achieved compared to old MJPEG.
-
-If you use an OS image built after 2021.06.10, this mode will be available by default.
-If you are upgrading to an older version of the OS, you will need to manually enable the WebRTC gateway:
-
-```
-# systemctl enable --now kvmd-janus
-```
-
-Then reload the Web UI and then in the **System** menu you will see the video mode switch.
+This is a main video streaming mode available on PiKVM V3+ devices and DIY builds based on CSI bridge (USB capture devices are not supported).
+With the efficient H.264 encoding, a significant reduction in traffic is achieved compared to old MJPEG mode.
 
 !!! note
-    If you don't see the switch, it means that either your browser does not support WebRTC, or the `kvmd-janus` service was not started.
+    The video modes can be switched in the **System** menu in the Web UI.
+    If you don't see the switch, probably your browser does not support H.264,
+    or Janus Gateway (the WebRTC server) is not running on PiKVM.
+
+    See the [troubleshooting](#troubleshooting) section below.
 
 
+-----
 ## H.264 parameters
 
 The main parameters available for configuration in the Web UI are **bitrate** and **gop**.
@@ -29,7 +21,8 @@ The main parameters available for configuration in the Web UI are **bitrate** an
   The recommended value is 0 for low-loss networks, this will also reduce latency. Use a value of 30 or so for unreliable networks if the image flickers frequently.
 
 
-## Details
+-----
+## How it's working
 
 The MJPEG video stream uses the same HTTP connection that you use to get the web interface.
 This means that for remote access, you just need to forward ports 80 and 443 on your router. 
@@ -58,6 +51,7 @@ janus:
 ... and restart `kvmd-janus` service using `systemctl restart kvmd-janus`.
 
 
+-----
 ## Custom Janus config
 
 [Janus](https://janus.conf.meetecho.com) is a WebRTC gateway that is used to transmit the [uStreamer](https://github.com/pikvm/ustreamer) video.
@@ -73,6 +67,7 @@ You can find it in `/etc/kvmd/janus/janus.jcfg`.
 ```
 
 
+-----
 ## Troubleshooting
 
 In rare cases, WebRTC may not work. Here some common tips:
@@ -83,12 +78,14 @@ In rare cases, WebRTC may not work. Here some common tips:
 
 * Tricky IPv6 configuration on the network can be a problem. IPv6 support for WebRTC in PiKVM is still in its infancy, so if your network has IPv4, it will be easiest to disable IPv6 on PiKVM. To do this, switch the file system to write mode using `rw` command, add option `ipv6.disable_ipv6=1` to `/boot/cmdline.txt` and perform `reboot`. Also see [here](https://wiki.archlinux.org/title/IPv6#Disable_IPv6).
 
-* A paranoid firewall when you try to connect to the PiKVM by forwarding port 443 to the Internet from the internal network. WebRTC is not enough of this, it uses UDP on ports 10000-20000 for a P2P connection. Make sure that the Firewall does not block them.
+* A paranoid firewall when you try to connect to the PiKVM by forwarding port 443 to the Internet from the internal network. WebRTC is not enough of this, it uses UDP on ports 20000-40000 for a P2P connection. Make sure that the Firewall does not block them.
 
 * If nothing helps, open the browser's JS console and look at the log, and contact our community via [Discord](https://discord.gg/bpmXfz5). Developers and/or experienced users will definitely help you.
 
 * Another option to try is if you have both wifi and eth connected, disable wifi `rfkill list wifi` then `rfkill block X` where is a number that shows in the output. Reason: Arch Linux will choose to route all outgoing packets out wifi by default.
 
-* There are some linux distro's that require more work to be able to use H.264 (WEBRTC MODE), this may include any RedHat variant.
+* There are some Linux distro's that require more work to be able to use H.264 (WEBRTC MODE), this may include any RedHat or Debian variant.
 
-    * For instance: On Fedora you can install the rpmfusion repos, then use the `chromium-freeworld` package instead of `chromium`
+    * On Fedora you can install the rpmfusion repos, then use the `chromium-freeworld` package instead of `chromium`
+
+    * If on Firefox, make sure the OpenH264 Plugin both exists and is enabled (known issue on Debian GNU/Linux). Press `Ctrl+Shift+A` to open the Add-ons Manager, then press `Plugins`. You should see *OpenH264 Video Codec provided by Cisco Systems, Inc.*. Make sure it is enabled by pressing the "more options" button (3 horizontal dots), then pressing `Always Activate`.
