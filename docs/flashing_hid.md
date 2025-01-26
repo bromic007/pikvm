@@ -1,3 +1,8 @@
+!!! warning "Legacy warning"
+    This page describes the legacy keyboard and mouse emulator used in old DIY builds.
+    There is no point using it today because there is a more modern and better replacement for the [new Pico HID](pico_hid.md).
+    This one can also serve as an in-place compatible replacement for the Arduino HID in the old build.
+
 # Flashing the Arduino HID
 
 ## Serial Firmware (the default option)
@@ -15,7 +20,7 @@ This operation can be done using your RPi (except Pi Zero W). Here the common st
     ```
     # rw
     # systemctl stop kvmd
-    # cp -r /usr/share/kvmd/hid ~
+    # cp -r /usr/share/kvmd/hid/arduino ~
     # cd ~/hid
     # make
     # make install
@@ -42,7 +47,7 @@ This operation can be done using your Raspberry Pi without disconnecting any wir
     ```shell
     # rw
     # systemctl stop kvmd
-    # cp -r /usr/share/kvmd/hid ~
+    # cp -r /usr/share/kvmd/hid/arduino ~
     # cd ~/hid
     # make spi
     # make install

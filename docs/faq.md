@@ -5,6 +5,16 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 ## Common questions
 
+??? question "Where can I get a memory card image for PiKVM?"
+    See here: https://pikvm.org/download
+
+
+??? question "Can PiKVM work on Raspberry Pi 5?"
+
+    * Not now, but it will. Pi5 does not support hardware video encoding so there is no any reason to use it for PiKVM.
+    * RPi5 is not compatible with PiKVM V3 HAT due to the difference in form factor with RPi4.
+
+
 ??? question "Can I connect multiple servers to a single PiKVM?"
     Yes, but it requires additional work to set up. See [this page](multiport.md).
 
@@ -14,6 +24,11 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 
 ??? question "Can I assign a static IP to a PiKVM"
+
+    Yes, we highly suggest using this [document](https://docs.pikvm.org/on_boot_config/#other-available-options) first for those that are not Linux savvy.
+
+    [ONLY FOR ADVANCED LINUX USERS]
+    
     Edit file `/etc/systemd/network/eth0.network` for Ethernet or `wlan0.network` for Wi-Fi and edit the `[Network]` section:
 
     ```ini
@@ -24,9 +39,28 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     DNS=192.168.x.x
     ```
 
-    If you're using Wi-Fi but you don't have `/etc/systemd/network/wlan0.network` file, then first you will need to [`migrate the Wi-Fi settings from `netctl` to `systemd-networkd`](wifi.md).
+    ??? warning "Don't forget the `/24` suffix (CIDR), otherwise it will not work and your PiKVM will become unreachable"
 
 
+??? question "How can I disable IPv6 on PiKVM?"
+
+    To do this, you need at least KVMD 3.301 installed on your device. If this is not the case, update the OS.
+
+    Next, append the `ipv6.disable=1` parameter to `/boot/cmdline.txt` and perform `reboot`.
+
+
+??? question "How do I recover my PiKVM, it cannot be reached now"
+
+    1. Take the USB-C end cable you have for your target and move to the PiKVM IOIO port or CON port
+    2. Take the USB-A end cable and put this on the HOST(The controlling PC)
+    3. Turn on or reboot your PiKVM, you should now see a COMx port on your HOST PC
+    4. Connect using something like Putty, use 115200 as your baud rate
+    5. Edit the file using nano or whatever text editor you are comfortable with, save the file
+    6. Reboot your PiKVM, check for functionality
+    7. If still unreachable, edit the same file to fix it
+    8. ONLY Disconnect the IOIO port once you have fully recovered your PiKVM and place this back onto the Target system
+
+    
 ??? question "Can I use PiKVM for gaming?"
     No, because:
 
@@ -37,7 +71,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 ??? question "Can PiKVM do 4K video?"
     * For HDMI-CSI bridge, no. There is not enough bandwidth in the CSI bus for that much data. 1080p50 will max out the bandwidth.
-    * For the USB capture devices: technically yes, they will downsample to something smaller to meet the USB 2.0 bandwidth limitations, so the source may be 4k, but the stream will not.
+    * For the USB capture devices: technically yes, they will down sample to something smaller to meet the USB 2.0 bandwidth limitations, so the source may be 4k, but the stream will not.
     * The 4K real-time video will not fit through the network anyway.
 
 
@@ -48,19 +82,30 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
     100-200ms is very, very fast for this. But we are working to speed things up even more.
 
+??? question "I am expecting to see 60fps and I am not, why?"
+
+    PiKVM receives the entire signal, but then the encoding is the bottleneck. For 1080p, this is no more than 30 fps. V4 throws out every second frame of 60 hz/fps, and 30 fps is encoded. V3 and DIY can't process 60 hz and is only able to capture 50 hz, and in the same way they take every second frame, all you get out is 25 fps. The reason why V3 and DIY does not encode 30 out of 50 is that the picture will be jerky, but smooth at 25.
 
 ??? question "Does PiKVM support sound?"
-    Yes but the only officially supported version is the PiKVM V3+ devices, V2 we will attempt best effort but ultimatly we do not support CSI modules or USB.
+    Yes but the only officially supported version is the PiKVM V3+ devices, V2 we will attempt best effort but ultimately we do not support CSI modules or USB.
 
 
 ??? question "Can I power the Pi via PoE?"
-    Yes! But you still need a splitter to ensure you isolate the 5v connection between the Raspberry Pi and host PC to prevent backpower issues that can cause instability or damage to either the host PC or the Pi. Power/Data cable + USB power blocker would work.
+    Yes! 
+
+    For a POE HAT
+    
+    You still need a splitter to ensure you isolate the 5v connection between the Raspberry Pi and host PC to prevent back power issues that can cause instability or damage to either the host PC or the Pi. Power/Data cable + USB power blocker would work.
+
+    For a POE Splitter
+    
+    No, there is no need for anything additional, you can power your RPi and or the PiKVM Mini with the USB-C variant.
 
 
 ??? question "Do I need a power splitter? Why do I need one?"
-    * Yes for RPi4 - Please see the main readme for splitter types listed under V2 hardware
+    * Yes for RPi4 - Please see the main v2 document for splitter types listed under V2 hardware
     * Yes for Zero W and Zero W 2, if using dedicated power you still need to split the power from the data towards the target. If using the target for power, this is not needed.
-    * This is not needed if you have a PiKVM V3, as the HAT splits power and signal on the board.
+    * This is not needed if you have a PiKVM V3 and V4, as they splits power and signal on the board.
 
 
 ??? question "Can I use PiKVM with non-Raspberry Pi boards (Orange, Nano, etc)?"
@@ -78,7 +123,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     * Raspbian did not have all the necessary packages in the repositories to satisfy most software dependencies.
     * PiKVM was born as a pet project, and the founder likes Arch the most.
 
-    However, we plan to provide an alternative OS image based on Raspbian in the future - now it is quite stable.
+    However, we plan to provide an alternative OS image based on Raspberry Pi OS in the future - now it is quite stable.
 
 ??? question "Can I use an iPad on PiKVM?"
     * Yes, with the correct hardware you can control an iPad.
@@ -91,6 +136,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 ??? question "How do I emulate various USB devices on the target machine?"
     Please review [First Steps](first_steps.md) before continuing
+    
     By default this is what is set:
 
     ```yaml
@@ -117,17 +163,20 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 
 ??? question "Can I run a desktop on PiKVM?"
-    Yes, but it's strongly not recommended OR supported as this OS should be used in read-only mode and it will need read-write enabled all of the time. Instructions [here](https://www.linuxfordevices.com/tutorials/linux/how-to-install-gui-on-arch-linux).
+    Yes, but it's strongly not recommended OR supported as this OS should be used in read-only mode and it will need read-write enabled all of the time, however if you insist on running one, instructions are [here](https://www.linuxfordevices.com/tutorials/linux/how-to-install-gui-on-arch-linux).
 
 
 ??? question "How do I blank the oled screen?"
     Please run the following:
     ```
-    /usr/bin/kvmd-oled --height=32 --interval=5 --clear-on-exit --text="turn off in 5s"
-    systemctl disable --now kvmd-oled kvmd-oled-reboot kvmd-oled-shutdown
+    # systemctl disable --now kvmd-oled kvmd-oled-reboot kvmd-oled-shutdown
+    # kvmd-oled --height=32 --interval=0 --clear-on-exit --text=x
     ```
-
-
+    To re-enable the display:
+    ```
+    # systemctl enable --now kvmd-oled kvmd-oled-reboot kvmd-oled-shutdown
+    ```
+    
 ??? question "How do I rotate the OLED display?"
     Please run the following:
     ```
@@ -146,7 +195,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     * Bad YAML syntax, edit your `/etc/kvmd/override.yaml` file and undo what you did and restart PiKVM.
 
 
-??? question "How can I use the serial console to access to access other devices"
+??? question "How can I use the serial console to gain access to other devices"
     You need to stop the service which listens on the `/dev/ttyAMA0`:
 
     ```
@@ -165,27 +214,29 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
         * If you disable the service permanently, you can't recover your device via serial console if you need this.
         * There are some reports, that you need to remove `ttyAMA0` from /boot/cmdline.txt, but this is not needed on new installations.
 
-
-??? question "How can I have different hostnames for multiple pikvms?"
-    Using a SSH session or the web terminal:
-    - Make sure you're `root`, if you're not root use the `su` command to become root
-    - Enter read write mode of the PiKVM by executing the `rw` command
-    - Execute: `hostnamectl set-hostname yournewhostname.domain`
-    - Optional: Edit `/etc/kvmd/meta.yaml` to alter the displayed server name in the web UI
-    - Reboot the pikvm
-
-
 ??? question "Can I run PiKVM in a docker?"
     No, technically it might be possible but the OS requires many specific settings that cannot be performed inside the container.
 
 
 ??? question "How can I change the HTTP/HTTPS ports?"
-    You can change the ports in the following files:
-    - `/etc/kvmd/nginx/listen-https.conf`
-    - `/etc/kvmd/nginx/listen-http.conf`
-    - `/etc/kvmd/nginx/redirect-to-https.conf`
+
+    To do this, you need at least KVMD 3.301 installed on your device. If this is not the case, update the OS.
+
+    Add some of these lines to `/etc/kvmd/override.yaml`:
+
+    ```yaml
+    nginx:
+        https:
+            port: 4430
+        http:
+            port: 8080
+    ```
 
     After that, restart the server: `systemctl restart kvmd-nginx`.
+
+
+??? question "Can I control IR devices using PiKVM?"
+    This goes far beyond the usual use of PiKVM, so there is no official way to do this, but there are [some ways](https://github.com/pikvm/pikvm/issues/291) from the community that you can try if you know how to handle a soldering iron.
 
 
 ## First steps
@@ -224,11 +275,9 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     To add a shell/terminal account:
     # rw
     # su -
-    # adduser <user>
+    # useradd <user>
     # passwd <user>
     ```
-
-    Keep in mind that the more users that are added, the stream if accessed, fps will drop.
 
 
 ??? question "How do I get root access in the web terminal?"
@@ -261,6 +310,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
         * Do the same in `/etc/fstab` for the `/boot` partition.
         * Comment `tmpfs` lines in `/etc/fstab` for `/var/lib` and `/var/log`.
         !!! danger "But again: DON'T DO THIS"
+        !!! warning "If you do plan on doing this, no assistance will be provided beyond this point other than the existing documentation."
 
 
 ??? question "How to set the date, time and timezone from command line?"
@@ -274,32 +324,21 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     * Switch filesystem to RO-mode with the command `ro`.
 
 
+??? question "How do I update PiKVM with the latest software?"
+
+    {!_update_os.md!}
+
+
 ??? question "How do I install or remove packages in PiKVM OS?"
     PiKVM OS is based on Arch Linux ARM and uses the [pacman](https://wiki.archlinux.org/title/Pacman) package manager.
 
     * Ensure the date is correct: `date`. Otherwise you may get the error `SSL certificate problem: certificate is not yet valid`
+    * It is recommended to update the OS before installing new packages (see the tip upper ^^^).
     * Switch filesystem to RW-mode: `rw`.
     * Find some packages (`emacs` for example): `pacman -Ss emacs`.
-    * Install it, while keeping the system updated: `pacman -Syu emacs`.
-    * To only update packages without installing new ones, use `pacman -Syu`
+    * Install it: `pacman -Syy` to update local packages list and `pacman -Su emacs` to install.
     * Remove it: `pacman -R emacs`.
     * Switch filesystem to RO-mode: `ro`.
-
-
-??? question "How do I update PiKVM with the latest software?"
-    This is ONLY recommended if you need a feature, otherwise this should ONLY be done if you are physically at the device and can reflash the sd card as a means of recovery. PiKVM OS is based on Arch Linux ARM and is fully updated from the repository by a regular package manager. Connect to your PiKVM via ssh and run:
-
-    * Ensure the date is correct: `date`. Otherwise you may get the error `SSL certificate problem: certificate is not yet valid`
-    * Run the following:
-
-    ```
-    # date
-    # rw
-    # pacman -Syu
-    # reboot # Allow 10 to 15 minutes for a response.
-    ```
-
-    Pacman saves all installed packages in a compressed format so that you can roll back to the old version if something goes wrong. After you've updated and made sure everything works, (ONLY for older images, newer images has this partition expended and no longer has this issue) it makes sense to clear the package cache so that it doesn't take up space on the SD card: `rw; rm -rf /var/cache/pacman/pkg; ro`.
 
 
 ??? question "I don't need ATX functions. How do I disable this in the Web UI?"
@@ -311,7 +350,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
             type: disabled
     ```
 
-   ... then restart `kvmd`:
+    ... then restart `kvmd`:
 
     ```
     # systemctl restart kvmd
@@ -325,19 +364,8 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 
 ??? question "How do I completely disable authorization in PiKVM?"
-    Edit the file `/etc/kvmd/override.yaml`:
 
-    ```yaml
-    kvmd:
-        auth:
-            enabled: false
-    ```
-
-    ... then restart `kvmd`:
-
-    ```
-    [root@pikvm ~]# systemctl restart kvmd
-    ```
+	See [here](auth.md).
 
 
 ??? question "Can I have different hostnames for each of my PiKVMs?"
@@ -346,6 +374,8 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     * Optional: edit `/etc/kvmd/meta.yaml` to alter the displayed hostname in the web UI.
     * Run `ro` and `reboot`.
 
+??? question "Why not add software support for another codec?"
+    Encoding is a heavy process and will add significant latency, its best to have hardware support to avoid additional latency.
 
 ## Video problems
 
@@ -354,7 +384,7 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 
 ??? question "PiKVM does not show the video from the computer at all"
-    * Double-check that the video capture device is connected correctly. For the [CSI bridge](/README.md#for-the-hdmi-csi-bridge), this should be exactly the camera port; for the [USB dongle](/README.md#for-the-hdmi-usb-dongle), strictly the port indicated in the picture.
+    * Double-check that the video capture device is connected correctly.
     * Some laptops do not output any signal until you switch the output (usually via the FN + and an F5 key on the keyboard).
     * Your computer may have turned on sleep mode for the monitor. Move the mouse to turn it off.
     * For windows you might need to check for the active signal resolution. To change the active signal resolution you have to go to Settings>System>Display>Advanced display settings>Display adapter properties then, click "List All Models" and choose the one you want. Keep trying different Hz settings.
@@ -399,18 +429,32 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 
 ??? question "No image from computer with Linux + Awesome WM"
-    Sometimes Awesome WM on Linux can't recognize a video output change on a cable. That is, if the cable was first inserted into the monitor, and then you reconnected it to PiKVM - it may happen that you will not see the image. It seems that the problem is Awesome WM, since for example with KDE, it is not reproducable. If you turn on your workstation with PiKVM already connected, everything will work fine.
+    Sometimes Awesome WM on Linux can't recognize a video output change on a cable. That is, if the cable was first inserted into the monitor, and then you reconnected it to PiKVM - it may happen that you will not see the image. It seems that the problem is Awesome WM, since for example with KDE, it is not reproducible. If you turn on your workstation with PiKVM already connected, everything will work fine.
 
 
 ??? question "Windows shows limited Available Resolutions"
     This is due to a driver issue. A possible resolution can be found [here](https://github.com/pikvm/pikvm/issues/577#issuecomment-998713201).
 
 
+??? question "Firefox ESR from the Debian repo shows the black screen in H.264 mode"
+    Make sure the OpenH264 Plugin both exists and is enabled (known issue on Debian GNU/Linux). Press `Ctrl+Shift+A` to open the Add-ons Manager, then press `Plugins`. You should see *OpenH264 Video Codec provided by Cisco Systems, Inc.*. Make sure it is enabled by pressing the "more options" button (3 horizontal dots), then pressing `Always Activate`.
+
+
+??? question "Apple TB/USB-C HDMI video doesn't work"
+    A possible solution can be found [here](https://github.com/pikvm/pikvm/issues/1011).
+
+
+??? question "I am seeing a NO SIGNAL, what can I do?"
+    If you are using PiKVM V2 or a V3, you need to ensure that your target is using the maximum resolution **1920x1080@50Hz**, 60Hz will not work.
+
+    If you are using the PiKVM V4, ensure that you are getting a signal out from the target by using a physical monitor using the same exact cable/dongle, ensure that you are using the maximum resolution **1920x1200@60hz**, 2K/4K resolutions will not work.
+
+    
 ## USB problems (keyboard, mouse, mass storage, etc)
 
 ??? question "My computer does not recognize USB of PiKVM V2+ at all"
     * Make sure that you have used the correct USB cable with DATA lines to connect the OTG port for the Raspberry to the computer. You may have decided to use a USB hub instead of a Y-cable and **it won't work**. Use good cables and follow the instructions :)
-    * In rare cases, some very buggy BIOSes do not like HID and Mass Storage in one USB device. You can either [disable Mass Storage](msd.md#disable-msd), or use an [Arduino HID](arduino_hid.md) to physically separate them.
+    * In rare cases, some very buggy BIOS's do not like HID and Mass Storage in one USB device. You can either [disable Mass Storage](msd.md#disable-msd), or use the [Pico HID](pico_hid.md) to physically separate them.
 
 
 ??? question "BIOS/UEFI does not recognize USB of V2+, but computer does"
@@ -435,14 +479,14 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 
 ??? question "My mass storage drive works (I can boot an image from PiKVM V2+), but my keyboard/mouse does not"
-    In rare cases, some very buggy BIOSes does not like HID and Mass Storage in one USB device. You can either [disable Mass Storage](msd.md#disable-msd), or use an [Arduino HID](arduino_hid.md) to physically separate them.
+    In rare cases, some very buggy BIOS's does not like HID and Mass Storage in one USB device. You can either [disable Mass Storage](msd.md#disable-msd), or use the [Pico HID](pico_hid.md) to physically separate them.
 
 
 ??? question "Buggy absolute mouse on Windows 98 as managed server"
     How to fix:
 
     * [V2+](mouse.md#fixing-the-absolute-mouse-on-windows-98).
-    * [Arduino HID](arduino_hid.md#fixing-the-usb-absolute-mouse-on-windows-98).
+    * [Pico HID](pico_hid.md#configuring-the-hid-modes).
 
 
 ??? question "The mouse does not work with NVR/DVR CCTV"
@@ -468,6 +512,13 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 ??? question "What speed is the USB OTG port?"
     Per the official RPI documentation, this is a limitation of the SoC.  The OTG port is only USB2.0, so is limited to 455 Mbit/s.
 
+??? question "On MacOSX, my mouse/keyboard does not work!"
+    There are a few fixes the community has suggested:
+    
+    If using a USB-C to USB-C cable, you need to use the included USB-C to USB-A cable then use a USB-A to USB-C adapter
+    
+    You may need to allow new accessories to connect. [Source](https://support.apple.com/en-us/102282)
+
 
 ## Web UI problems
 
@@ -481,16 +532,6 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
 
 ??? question "Pressing ESC in full screen mode causes the PiKVM page to close"
     Your browser does not support [keyboard lock](https://caniuse.com/mdn-api_keyboard_lock). Right now (January 2022), only Chromium implements this, so it works on Chrome, Edge, and Opera.
-
-
-??? question "I can't use the PiKVM web interface on iOS: the Web UI network indicator flashes yellow"
-    Safari on iOS contains an old bug that prevents a web application from connecting over a web socket if you use a self-signed certificate on the server (the default for PiKVM). There are two solutions:
-
-    * Install a valid SSL certificate for PiKVM host to `/etc/kvmd/nginx/ssl`.
-    * Disable HTTPS at all in `/etc/kvmd/nginx/nginx.conf`. To do this, comment some lines [like in this file](https://github.com/pikvm/kvmd/blob/master/configs/nginx/nginx.conf#L39) and restart web server: `systemctl restart kvmd-nginx`.
-
-    !!! danger
-        Don't do this for insecure networks or the Internet. Your passwords and what you type on the keyboard will be transmitted in unencrypted form.
 
 
 ??? question "The Web UI doesn't work properly in Firefox while it works fine in Chrome"
@@ -520,9 +561,69 @@ As a first step, we recommend carefully reading our documentation on [GitHub](ht
     * If your device is unable to connect to the Wi-Fi network that you have set up, check the 2.4 GHz Wi-Fi channel used by your Wi-Fi access point. 
       If channels 12 to 14 are used (some countries have banned these channels) try to use a channel between 1 and 11.
 
+??? question "How do I connect to multiple Wi-Fi networks?"
+    There are two ways to do this.
+    
+    Recommended:
+    
+    You can stack wifi networks in `/etc/wpa_supplicant/wpa_supplicant-wlan0.conf`
+
+    Example:
+
+    ```c
+    update_config=1
+
+    network={
+            ssid="SSID1"
+            psk=abcdef0123456789
+    }
+
+    network={
+            ssid="SSID2"
+            psk=abcdef0123456789
+    }
+
+    network={
+            ssid="SSID3"
+            psk=abcdef0123456789
+    }
+    ```
+
+    Create your PSK using this command: `wpa_passphrase 'MyNetwork' 'P@assw0rd' >> /etc/wpa_supplicant/wpa_supplicant-wlan0.conf`
+
+    The second way is to use NetworkManager which is an alternitive but not recommended
+
+    ```console
+    # rw
+    # su -
+    # pacman -S networkmanager
+    # nmcli device wifi list
+    # nmcli device wifi connect SSID1 password PASSWORD # Is needed to make the initial wifi connection
+    # nmcli device wifi connect SSID2 password PASSWORD # Is needed to make the seconadry wifi connection
+    # nmcli connection up SSID1/SSID2 # You can switch from 1 wifi network to another
+    # nmcli connection show # This shows a list of the correct connections / green shows connected state, white shows disconnected state
+    # nmcli connection modify SSID1 connection.autoconnect-priority 1 # This will make the first SSID the main one if you are in range of both
+    # nmcli connection modify SSID2 connection.autoconnect-priority 2 # If this is disconnected, it will switch to the first and visa versa
+    ```
+
+    Here are some additional commands and caveats
+
+    ```console
+    # nmcli device wifi list
+    ```
+
+    ??? note "if you type nmcli and get the following error"
+        "nmcli (1.44.0) and NetworkManager (Unknown) versions don't match. Restarting NetworkManager is advised. Error: NetworkManager is not running."
+
+    ```console
+    # systemctl list-unit-files --all #look for networkmanager, if its disabled, enable it and start the service
+    # systemctl enable NetworkManager.service
+    # systemctl start NetworkManager.service
+    ```
+
 
 ??? question "LEDs/Switches do not work in ATX control"
-    Double check your wiring as per [the documentation](/README.md#setting-up-the-v2). Make sure you placed the relays (G3VM-61A1) in the correct orientation. The relays for switches (Power, Reset) have a different orientation than the ones for LEDs.
+    Double check your wiring. Make sure you placed the relays (G3VM-61A1) in the correct orientation. The relays for switches (Power, Reset) have a different orientation than the ones for LEDs.
 
 
 ??? question "My PiKVM keeps disconnecting from the Wi-Fi network"

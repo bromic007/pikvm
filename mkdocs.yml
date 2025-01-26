@@ -57,36 +57,54 @@ plugins:
     - search:
         lang: en
     - mkdocs-video
+    - redirects:
+        redirects_maps:
+            "lte.md": "modem.md"
+            "gsm.md": "modem.md"
+            "3g.md": "modem.md"
+            "4g.md": "modem.md"
+            "usb_dynamic.md": "usb.md"
 
 nav:
+    - "Device guides":
+        - "PiKVM V4 Mini & Plus": v4.md
+        - "PiKVM V3 HAT": v3.md
+        - "PiKVM Switch": switch.md
+        - "DIY PiKVM V2": v2.md
+        - "DIY PiKVM V1": v1.md
     - "Getting started":
-        - "PiKVM V4 Mini & Plus guide": v4.md
-        - "PiKVM V3 HAT guide": v3.md
         - "First steps": first_steps.md
+        - "Web UI Overview": webui.md
         - "Authentication": auth.md
-        - "FAQ": faq.md
+        - "FAQ & Troubleshooting": faq.md
+        - "Flashing OS": flashing_os.md
     - "Networking":
         - "Internet access":
             - "Port forwarding": port_forwarding.md
             - "Tailscale VPN": tailscale.md
             - "Cloudflare Tunnel": cloudflared.md
         - "Setting up Wi-Fi": wifi.md
+        - "Setting up 3G/4G/LTE modem": modem.md
         - "Let's Encrypt certificates": letsencrypt.md
     - "Video":
+        - "Tuning HDMI EDID": edid.md
+        - "HDMI passthrough": pass.md
         - "H.264 / WebRTC": webrtc.md
         - "Working with video": video.md
-        - "Tuning HDMI EDID": edid.md
-        - "HDMI audio": audio.md
     - "Peripheral devices":
+        - "USB configuration": usb.md
+        - "Audio / microphone": audio.md
         - "Keyboard & mouse":
             - "Mouse modes": mouse.md
+            - "Mouse jiggler": mouse_jiggler.md
+            - "Pico HID (USB, PS/2)": pico_hid.md
             - "Bluetooth HID": bluetooth_hid.md
-            - "Arduino HID (USB, PS/2)": arduino_hid.md
         - "Mass Storage Drive": msd.md
         - "Ethernet-over-USB": usb_ethernet.md
         - "Serial-over-USB": usb_serial.md
         - "GPIO (pins, relays, lamps, etc)": gpio.md
     - "Advanced usage":
+        - "On-boot configuration": on_boot_config.md
         - "Using VNC": vnc.md
         - "Multiport KVM-over-IP": multiport.md
         - "Wake-on-LAN the server": wol.md
@@ -94,6 +112,10 @@ nav:
         - "Persistent storage": pst.md
         - "Prometheus monitoring": prometheus.md
     - "Development":
-        - "Cases for 3D printing": 3d_printing.md
-        - "Building PiKVM OS": building_os.md
         - "HTTP API reference": api.md
+        - "Building PiKVM OS": building_os.md
+        - "Cases for 3D printing": 3d_printing.md
+    - "Legacy":
+        - "Arduino HID": arduino_hid.md
+        - "Big DVD images on old PiKVM": msd_legacy.md
+    - "Compliance": compliance.md
